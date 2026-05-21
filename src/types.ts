@@ -31,7 +31,9 @@ export interface PRViewModel {
   project: string;
   repoName: string;
   author: string;
-  requiredReviewers: string[];
+  reviewers: string[];
+  reviewerCount: number;
+  completedReviewCount: number;
   approvalCount: number;
   hasActiveComments: boolean;
   url: string;

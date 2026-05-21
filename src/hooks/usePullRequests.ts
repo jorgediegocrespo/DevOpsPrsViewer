@@ -45,10 +45,11 @@ export function usePullRequests(selectedProjects: string[]): UsePullRequestsResu
           const hasActiveComments = threads.some(
             (t) => !t.isDeleted && t.status === 'active'
           );
-          const requiredReviewers = pr.reviewers
-            .filter((r) => r.isRequired)
-            .map((r) => r.displayName);
-          const approvalCount = pr.reviewers.filter((r) => r.vote === 10).length;
+          const requiredReviewers = pr.reviewers.filter((r) => r.isRequired);
+          const reviewers = requiredReviewers.map((r) => r.displayName);
+          const reviewerCount = requiredReviewers.length;
+          const completedReviewCount = requiredReviewers.filter((r) => r.vote !== 0).length;
+          const approvalCount = requiredReviewers.filter((r) => r.vote === 10).length;
           const url = `${ADO_BASE}/${encodeURIComponent(project)}/_git/${encodeURIComponent(pr.repository.name)}/pullrequest/${pr.pullRequestId}`;
 
           return {
@@ -57,7 +58,9 @@ export function usePullRequests(selectedProjects: string[]): UsePullRequestsResu
             project,
             repoName: pr.repository.name,
             author: pr.createdBy.displayName,
-            requiredReviewers,
+            reviewers,
+            reviewerCount,
+            completedReviewCount,
             approvalCount,
             hasActiveComments,
             url,
