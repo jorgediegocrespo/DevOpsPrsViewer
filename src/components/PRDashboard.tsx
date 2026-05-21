@@ -288,6 +288,21 @@ export function PRDashboard() {
     return prs.filter((pr) => !selectedAuthors.includes(pr.author));
   }, [prs, selectedAuthors]);
 
+  const summary = useMemo(() => {
+    const counts: Record<ColumnKey, number> = {
+      created: 0,
+      inReview: 0,
+      comments: 0,
+      ready: 0,
+    };
+
+    for (const pr of visiblePRs) {
+      counts[classifyPR(pr)] += 1;
+    }
+
+    return counts;
+  }, [visiblePRs]);
+
   const boardByProject = useMemo(() => {
     const initial = activeProjects.reduce<Record<string, Record<ColumnKey, PRViewModel[]>>>(
       (acc, project) => {
@@ -388,6 +403,18 @@ export function PRDashboard() {
             onChange={handleSelectedAuthorsChange}
             disabled={prsLoading && authors.length === 0}
           />
+        </div>
+
+        <div className="mt-3 rounded-lg border border-slate-200 bg-white/90 px-3 py-2">
+          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
+            <span className="font-semibold text-slate-700">Summary</span>
+            <span className="rounded-full bg-slate-100 px-2 py-0.5">Created: {summary.created}</span>
+            <span className="rounded-full bg-slate-100 px-2 py-0.5">In review: {summary.inReview}</span>
+            <span className="rounded-full bg-slate-100 px-2 py-0.5">Comments: {summary.comments}</span>
+            <span className="rounded-full bg-slate-100 px-2 py-0.5">Ready: {summary.ready}</span>
+            <span className="rounded-full bg-slate-100 px-2 py-0.5">Projects: {activeProjects.length}</span>
+            <span className="rounded-full bg-slate-100 px-2 py-0.5">Ignored authors: {selectedAuthors.length}</span>
+          </div>
         </div>
 
         {projectsLoading && <p className="mt-2 text-xs text-slate-500">Loading projects…</p>}
