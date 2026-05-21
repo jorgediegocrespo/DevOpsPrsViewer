@@ -17,9 +17,6 @@ export function useProjects(): UseProjectsResult {
   useEffect(() => {
     let cancelled = false;
 
-    setLoading(true);
-    setError(null);
-
     fetchAllProjects(ORG, PAT)
       .then((data) => {
         if (!cancelled) setProjects(data);

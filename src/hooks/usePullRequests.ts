@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { fetchProjectPRs, fetchPRThreads } from '../api/azureDevOps';
 import { ORG, PAT, ADO_BASE } from '../config';
 import type { PRViewModel } from '../types';
@@ -14,7 +14,7 @@ export function usePullRequests(selectedProjects: string[]): UsePullRequestsResu
   const [prs, setPrs] = useState<PRViewModel[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const refreshCount = useRef(0);
+  const [refreshTick, setRefreshTick] = useState(0);
 
   const fetchAll = useCallback(async (projects: string[], signal: AbortSignal) => {
     if (projects.length === 0) {
@@ -96,16 +96,19 @@ export function usePullRequests(selectedProjects: string[]): UsePullRequestsResu
 
   useEffect(() => {
     const controller = new AbortController();
-    fetchAll(selectedProjects, controller.signal);
-    return () => controller.abort();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedProjects, refreshCount.current, fetchAll]);
+    const timerId = window.setTimeout(() => {
+      void fetchAll(selectedProjects, controller.signal);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timerId);
+      controller.abort();
+    };
+  }, [selectedProjects, refreshTick, fetchAll]);
 
   const refresh = useCallback(() => {
-    refreshCount.current += 1;
-    const controller = new AbortController();
-    fetchAll(selectedProjects, controller.signal);
-  }, [selectedProjects, fetchAll]);
+    setRefreshTick((prev) => prev + 1);
+  }, []);
 
   return { prs, loading, error, refresh };
 }

@@ -48,6 +48,7 @@ Web application to monitor Azure DevOps pull requests across multiple projects u
   - manual refresh button
   - auto-refresh every 30 seconds when projects are selected
   - refresh on browser window focus
+- Light/dark theme toggle with preference persisted in localStorage
 - Favicon customized with a review-themed SVG icon (free/original)
 - Config validation with clear startup error message when required environment variables are missing
 

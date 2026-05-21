@@ -30,12 +30,12 @@ export function PRRow({ pr }: Props) {
 
       {/* Required reviewers */}
       <td className="px-4 py-3 text-sm text-gray-700">
-        {pr.requiredReviewers.length === 0 ? (
+        {pr.reviewers.length === 0 ? (
           <span className="text-gray-400 italic">—</span>
         ) : (
           <ul className="space-y-0.5">
-            {pr.requiredReviewers.map((name) => (
-              <li key={name} className="whitespace-nowrap">{name}</li>
+            {pr.reviewers.map((reviewer) => (
+              <li key={reviewer.id} className="whitespace-nowrap">{reviewer.name}</li>
             ))}
           </ul>
         )}

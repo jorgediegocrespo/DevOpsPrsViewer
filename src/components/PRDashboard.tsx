@@ -60,9 +60,9 @@ function classifyPR(pr: PRViewModel): ColumnKey {
 }
 
 function cardToneByReviewers(reviewerCount: number): string {
-  if (reviewerCount === 0) return 'bg-slate-50/80 border-slate-200';
-  if (reviewerCount === 1) return 'bg-cyan-50/70 border-cyan-200';
-  return 'bg-amber-50/70 border-amber-200';
+  if (reviewerCount === 0) return 'bg-slate-50/80 border-slate-200 dark:bg-slate-900/80 dark:border-slate-700';
+  if (reviewerCount === 1) return 'bg-cyan-50/70 border-cyan-200 dark:bg-cyan-950/50 dark:border-cyan-900';
+  return 'bg-amber-50/70 border-amber-200 dark:bg-amber-950/50 dark:border-amber-900';
 }
 
 function initials(name: string): string {
@@ -100,44 +100,44 @@ function PRCard({ pr }: { pr: PRViewModel }) {
                   referrerPolicy="no-referrer"
                 />
               ) : (
-                <span className="flex h-full w-full items-center justify-center bg-slate-200 text-[10px] font-semibold text-slate-700">
+                <span className="flex h-full w-full items-center justify-center bg-slate-200 text-[10px] font-semibold text-slate-700 dark:bg-slate-700 dark:text-slate-100">
                   {initials(reviewer.name)}
                 </span>
               )}
             </div>
           ))}
           {overflowReviewers > 0 && (
-            <span className="ml-1 text-[10px] font-semibold text-slate-500">+{overflowReviewers}</span>
+            <span className="ml-1 text-[10px] font-semibold text-slate-500 dark:text-slate-300">+{overflowReviewers}</span>
           )}
         </div>
       )}
 
-      <p className="line-clamp-2 text-sm font-semibold text-slate-800">{pr.title}</p>
-      <div className="mt-2 space-y-1 text-xs text-slate-600">
+      <p className="line-clamp-2 pr-16 text-sm font-semibold text-slate-800 dark:text-slate-100">{pr.title}</p>
+      <div className="mt-2 space-y-1 text-xs text-slate-600 dark:text-slate-300">
         <p>
-          Repo: <span className="font-medium text-slate-700">{pr.repoName}</span>
+          Repo: <span className="font-medium text-slate-700 dark:text-slate-200">{pr.repoName}</span>
         </p>
         <p>
-          Author: <span className="font-medium text-slate-700">{pr.author}</span>
+          Author: <span className="font-medium text-slate-700 dark:text-slate-200">{pr.author}</span>
         </p>
         <p>
-          Reviewers: <span className="font-medium text-slate-700">{pr.reviewerCount}</span>
+          Reviewers: <span className="font-medium text-slate-700 dark:text-slate-200">{pr.reviewerCount}</span>
         </p>
       </div>
       <div className="mt-3 flex items-center gap-2 text-[11px] font-semibold">
         <span
           className={`rounded-full px-2 py-0.5 ${
             pr.approvalCount === 0
-              ? 'bg-slate-100 text-slate-600'
+              ? 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-200'
               : pr.approvalCount === 1
-                ? 'bg-sky-100 text-sky-700'
-                : 'bg-emerald-100 text-emerald-700'
+                ? 'bg-sky-100 text-sky-700 dark:bg-sky-950 dark:text-sky-200'
+                : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-200'
           }`}
         >
           Approvals: {pr.approvalCount}
         </span>
         {pr.activeCommentCount > 0 && (
-          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-amber-700">
+          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-amber-700 dark:bg-amber-950 dark:text-amber-200">
             Comments: {pr.activeCommentCount}
           </span>
         )}
@@ -216,7 +216,7 @@ function DropdownMultiSelect({
 
   return (
     <div ref={wrapperRef} className="relative">
-      <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+      <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
         {label}
       </label>
       <div className="relative">
@@ -229,14 +229,14 @@ function DropdownMultiSelect({
           placeholder={placeholder}
           disabled={disabled}
           readOnly={!open}
-          className="w-full truncate rounded-lg border border-slate-300 bg-white px-3 py-2 pr-9 text-sm shadow-sm focus:border-cyan-500 focus:outline-none disabled:bg-slate-100"
+          className="w-full truncate rounded-lg border border-slate-300 bg-white px-3 py-2 pr-9 text-sm shadow-sm focus:border-cyan-500 focus:outline-none disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-cyan-500 dark:disabled:bg-slate-800"
           title={!open ? selectedLabel : undefined}
         />
         <button
           type="button"
           onClick={() => setOpen((prev) => !prev)}
           disabled={disabled}
-          className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-500 disabled:opacity-60"
+          className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-500 disabled:opacity-60 dark:text-slate-300"
           aria-label={open ? 'Close filter dropdown' : 'Open filter dropdown'}
         >
           {open ? '▲' : '▼'}
@@ -244,43 +244,43 @@ function DropdownMultiSelect({
       </div>
 
       {open && (
-        <div className="absolute z-20 mt-1 w-full rounded-lg border border-slate-200 bg-white p-2 shadow-lg">
+        <div className="absolute z-20 mt-1 w-full rounded-lg border border-slate-200 bg-white p-2 shadow-lg dark:border-slate-700 dark:bg-slate-900">
           <div className="mb-1 flex items-center justify-between px-1">
-            <span className="text-xs text-slate-500">{selected.length} selected</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400">{selected.length} selected</span>
             <div className="flex items-center gap-3">
               <button
                 type="button"
                 onClick={selectAll}
-                className="text-xs font-medium text-cyan-700 hover:underline"
+                className="text-xs font-medium text-cyan-700 hover:underline dark:text-cyan-300"
               >
                 Select all
               </button>
               <button
                 type="button"
                 onClick={clearAll}
-                className="text-xs font-medium text-cyan-700 hover:underline"
+                className="text-xs font-medium text-cyan-700 hover:underline dark:text-cyan-300"
               >
                 Clear
               </button>
             </div>
           </div>
 
-          <div className="max-h-44 overflow-y-auto rounded-md border border-slate-200">
+          <div className="max-h-44 overflow-y-auto rounded-md border border-slate-200 dark:border-slate-700">
             {filteredOptions.length === 0 && (
-              <p className="px-2 py-2 text-xs text-slate-500">No results.</p>
+              <p className="px-2 py-2 text-xs text-slate-500 dark:text-slate-400">No results.</p>
             )}
 
             {filteredOptions.map((option) => (
               <label
                 key={option.id}
-                className="flex cursor-pointer items-center gap-2 px-2 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
+                className="flex cursor-pointer items-center gap-2 px-2 py-1.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800"
               >
                 <input
                   type="checkbox"
                   checked={selected.includes(option.label)}
                   onChange={() => toggleValue(option.label)}
                   disabled={disabled}
-                  className="rounded border-slate-300 text-cyan-600 focus:ring-cyan-500"
+                  className="rounded border-slate-300 text-cyan-600 focus:ring-cyan-500 dark:border-slate-600"
                 />
                 <span className="truncate">{option.label}</span>
               </label>
@@ -292,7 +292,12 @@ function DropdownMultiSelect({
   );
 }
 
-export function PRDashboard() {
+interface PRDashboardProps {
+  theme: 'light' | 'dark';
+  onToggleTheme: () => void;
+}
+
+export function PRDashboard({ theme, onToggleTheme }: PRDashboardProps) {
   const { projects, loading: projectsLoading, error: projectsError } = useProjects();
   const [activeProjects, setActiveProjects] = useState<string[]>(() => loadSavedSelection(PROJECT_STORAGE_KEY));
   const [selectedAuthors, setSelectedAuthors] = useState<string[]>(() => loadSavedSelection(AUTHOR_FILTER_STORAGE_KEY));
@@ -392,17 +397,25 @@ export function PRDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-100 via-white to-cyan-50 text-slate-800">
-      <header className="border-b border-slate-200 bg-white/85 px-6 py-4 backdrop-blur-sm">
+    <div className="min-h-screen bg-linear-to-br from-slate-100 via-white to-cyan-50 text-slate-800 dark:from-slate-950 dark:via-slate-900 dark:to-cyan-950 dark:text-slate-100">
+      <header className="border-b border-slate-200 bg-white/85 px-6 py-4 backdrop-blur-sm dark:border-slate-800 dark:bg-slate-900/85">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-xl font-bold tracking-tight text-slate-900">Pull Request Review</h1>
+          <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">Pull Request Review</h1>
 
           <div className="flex items-center gap-3">
-            <span className="text-xs text-slate-500">
+            <span className="text-xs text-slate-500 dark:text-slate-300">
               Showing <strong>{visiblePRs.length}</strong> of <strong>{prs.length}</strong> PRs
             </span>
 
-            {prsLoading && <span className="text-xs text-slate-400 animate-pulse">Refreshing…</span>}
+            {prsLoading && <span className="animate-pulse text-xs text-slate-400 dark:text-slate-500">Refreshing…</span>}
+
+            <button
+              type="button"
+              onClick={onToggleTheme}
+              className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+            >
+              {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+            </button>
 
             <button
               onClick={refresh}
@@ -434,31 +447,31 @@ export function PRDashboard() {
           />
         </div>
 
-        <div className="mt-3 rounded-lg border border-slate-200 bg-white/90 px-3 py-2">
-          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
-            <span className="font-semibold text-slate-700">Summary</span>
-            <span className="rounded-full bg-slate-100 px-2 py-0.5">Created: {summary.created}</span>
-            <span className="rounded-full bg-slate-100 px-2 py-0.5">In review: {summary.inReview}</span>
-            <span className="rounded-full bg-slate-100 px-2 py-0.5">Comments: {summary.comments}</span>
-            <span className="rounded-full bg-slate-100 px-2 py-0.5">Ready: {summary.ready}</span>
-            <span className="rounded-full bg-slate-100 px-2 py-0.5">Projects: {activeProjects.length}</span>
-            <span className="rounded-full bg-slate-100 px-2 py-0.5">Ignored authors: {selectedAuthors.length}</span>
+        <div className="mt-3 rounded-lg border border-slate-200 bg-white/90 px-3 py-2 dark:border-slate-700 dark:bg-slate-900/90">
+          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
+            <span className="font-semibold text-slate-700 dark:text-slate-200">Summary</span>
+            <span className="rounded-full bg-slate-100 px-2 py-0.5 dark:bg-slate-800">Created: {summary.created}</span>
+            <span className="rounded-full bg-slate-100 px-2 py-0.5 dark:bg-slate-800">In review: {summary.inReview}</span>
+            <span className="rounded-full bg-slate-100 px-2 py-0.5 dark:bg-slate-800">Comments: {summary.comments}</span>
+            <span className="rounded-full bg-slate-100 px-2 py-0.5 dark:bg-slate-800">Ready: {summary.ready}</span>
+            <span className="rounded-full bg-slate-100 px-2 py-0.5 dark:bg-slate-800">Projects: {activeProjects.length}</span>
+            <span className="rounded-full bg-slate-100 px-2 py-0.5 dark:bg-slate-800">Ignored authors: {selectedAuthors.length}</span>
           </div>
         </div>
 
-        {projectsLoading && <p className="mt-2 text-xs text-slate-500">Loading projects…</p>}
+        {projectsLoading && <p className="mt-2 text-xs text-slate-500 dark:text-slate-300">Loading projects…</p>}
         {projectsError && <p className="mt-2 text-sm text-red-600">{projectsError}</p>}
       </header>
 
       <main className="px-5 py-4">
         {prsError && (
-          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
             <strong>Error loading pull requests:</strong> {prsError}
           </div>
         )}
 
         {activeProjects.length === 0 && !prsLoading && (
-          <div className="rounded-lg border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm text-cyan-800">
+          <div className="rounded-lg border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm text-cyan-800 dark:border-cyan-900 dark:bg-cyan-950/40 dark:text-cyan-200">
             Select one or more projects in the top filter to load pull requests.
           </div>
         )}
@@ -474,36 +487,36 @@ export function PRDashboard() {
             };
 
             return (
-              <section key={project} className="rounded-xl border border-slate-200 bg-white/80 shadow-sm">
+              <section key={project} className="rounded-xl border border-slate-200 bg-white/80 shadow-sm dark:border-slate-800 dark:bg-slate-900/80">
                 <button
                   onClick={() => toggleProjectPanel(project)}
-                  className="flex w-full items-center justify-between rounded-t-xl px-4 py-3 text-left transition hover:bg-slate-50"
+                  className="flex w-full items-center justify-between rounded-t-xl px-4 py-3 text-left transition hover:bg-slate-50 dark:hover:bg-slate-800"
                 >
-                  <span className="font-semibold text-slate-900">{project}</span>
-                  <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  <span className="font-semibold text-slate-900 dark:text-slate-100">{project}</span>
+                  <span className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
                     {isCollapsed ? 'Expand' : 'Collapse'}
                   </span>
                 </button>
 
                 {!isCollapsed && (
-                  <div className="overflow-x-auto border-t border-slate-200 px-3 py-3">
+                  <div className="overflow-x-auto border-t border-slate-200 px-3 py-3 dark:border-slate-800">
                     <div className="grid min-w-245 grid-cols-4 gap-3">
                       {COLUMN_ORDER.map((columnKey) => {
                         const cfg = COLUMN_CONFIG[columnKey];
                         const columnPRs = projectColumns[columnKey];
 
                         return (
-                          <div key={columnKey} className={`rounded-xl border p-2 ${cfg.tone}`}>
+                          <div key={columnKey} className={`rounded-xl border p-2 ${cfg.tone} dark:border-slate-700`}>
                             <div className="mb-2 flex items-center justify-between px-1">
-                              <h2 className="text-sm font-semibold text-slate-800">{cfg.title}</h2>
-                              <span className="rounded-full bg-white px-2 py-0.5 text-xs font-bold text-slate-600">
+                              <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-100">{cfg.title}</h2>
+                              <span className="rounded-full bg-white px-2 py-0.5 text-xs font-bold text-slate-600 dark:bg-slate-900 dark:text-slate-200">
                                 {columnPRs.length}
                               </span>
                             </div>
 
                             <div className="space-y-2">
                               {columnPRs.length === 0 && (
-                                <p className="rounded-lg border border-dashed border-slate-300 bg-white/70 px-2 py-3 text-center text-xs text-slate-500">
+                                <p className="rounded-lg border border-dashed border-slate-300 bg-white/70 px-2 py-3 text-center text-xs text-slate-500 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-300">
                                   {cfg.empty}
                                 </p>
                               )}
