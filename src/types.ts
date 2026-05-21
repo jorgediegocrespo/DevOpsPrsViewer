@@ -1,0 +1,38 @@
+export interface AzureProject {
+  id: string;
+  name: string;
+}
+
+export interface Reviewer {
+  id: string;
+  displayName: string;
+  isRequired: boolean;
+  vote: number; // 10=approved, 5=approved w/ suggestions, 0=no vote, -5=waiting, -10=rejected
+}
+
+export interface RawPullRequest {
+  pullRequestId: number;
+  title: string;
+  createdBy: { displayName: string };
+  repository: { id: string; name: string };
+  reviewers: Reviewer[];
+  isDraft: boolean;
+}
+
+export interface Thread {
+  id: number;
+  status: 'active' | 'fixed' | 'wontFix' | 'closed' | 'byDesign' | 'pending' | 'unknown';
+  isDeleted?: boolean;
+}
+
+export interface PRViewModel {
+  id: number;
+  title: string;
+  project: string;
+  repoName: string;
+  author: string;
+  requiredReviewers: string[];
+  approvalCount: number;
+  hasActiveComments: boolean;
+  url: string;
+}
