@@ -1,140 +1,143 @@
 # Pull Request Viewer
 
-A web application for viewing and managing pull requests across multiple Azure DevOps projects in a centralized dashboard.
+Web application to monitor Azure DevOps pull requests across multiple projects using a kanban-style dashboard.
 
 ## Features
 
-- **Multi-Project Support**: View pull requests from multiple Azure DevOps projects simultaneously
-- **Project Filtering**: Select and filter which projects to display pull requests from
-- **Project Persistence**: Your selected projects are automatically saved to browser storage
-- **Manual Refresh**: Refresh pull request data on demand with a single click
-- **Real-time Status**: Visual loading indicators and status messages while fetching data
-- **Error Handling**: Clear error messages for configuration and API issues
-- **Clean UI**: Modern, responsive interface built with Tailwind CSS
+- Multi-project kanban board grouped by project
+- Collapsible project panels
+- Four PR columns:
+  - Created
+  - In review
+  - Comments
+  - Ready
+- Column routing rules:
+  - Comments: PR has active comments
+  - Ready: PR has 2 or more approvals and no active comments
+  - Created: PR has no required reviewers
+  - In review: everything else
+- Top summary bar under filters with total counts per column
+- Project filter with:
+  - multi-select
+  - search-as-you-type
+  - select all
+  - clear
+  - persisted selection in localStorage
+- Author filter in ignore mode:
+  - selected authors are excluded
+  - multi-select, search, select all, clear
+  - persisted selection in localStorage
+- PR cards include:
+  - title and direct link to Azure DevOps PR
+  - repository name
+  - author
+  - number of required reviewers
+  - approvals count
+  - active comments count (only when greater than 0)
+  - first 3 required reviewer avatars in top-right (+N overflow indicator)
+- Visual indicators:
+  - card background tone by required reviewer count
+  - approvals badge colors:
+    - gray for 0 approvals
+    - light blue for 1 approval
+    - green for 2 or more approvals
+- Sorting inside each column:
+  - higher reviewer count first
+  - newer PR id first as tie-breaker
+- Refresh behavior:
+  - manual refresh button
+  - auto-refresh every 30 seconds when projects are selected
+  - refresh on browser window focus
+- Favicon customized with a review-themed SVG icon (free/original)
+- Config validation with clear startup error message when required environment variables are missing
 
 ## Tech Stack
 
-- **Frontend Framework**: React 19 with TypeScript
-- **Build Tool**: Vite
-- **Styling**: Tailwind CSS
-- **API Integration**: Azure DevOps REST API
-- **Linting**: ESLint
+- React 19 + TypeScript
+- Vite
+- Tailwind CSS 4
+- Azure DevOps REST API
+- ESLint
 
 ## Prerequisites
 
-Before you begin, ensure you have the following installed:
+- Node.js 18+
+- npm
+- Azure DevOps personal access token (PAT) with at least Code Read permissions
 
-- **Node.js** (v18 or higher)
-- **npm** or **yarn**
-- **Azure DevOps Account** with:
-  - Access to your organization and projects
-  - A Personal Access Token (PAT) with appropriate permissions
+## Setup
 
-## Getting Started
-
-### 1. Clone the Repository
-
-```bash
-git clone <repository-url>
-cd PullRequestViewer
-```
-
-### 2. Install Dependencies
+1. Install dependencies
 
 ```bash
 npm install
 ```
 
-### 3. Create Environment Variables
+2. Create a .env file in the project root
 
-Create a `.env` file in the root directory of the project:
-
-```bash
-touch .env
-```
-
-Add the following environment variables:
-
-```
+```env
 VITE_ADO_ORG=your-organization-name
 VITE_ADO_PAT=your-personal-access-token
 ```
 
-**Note**: 
-- `VITE_ADO_ORG`: Your Azure DevOps organization name (e.g., `mycompany`)
-- `VITE_ADO_PAT`: Your Azure DevOps Personal Access Token with at least `Code (Read)` permissions
-
-### 4. Run the Development Server
+3. Start the app
 
 ```bash
 npm run dev
 ```
 
-The application will start on `http://localhost:5173` by default. Your browser should open automatically.
+Default URL: http://localhost:5173
 
-## Usage
+## Scripts
 
-1. **Select Projects**: The sidebar will load all available projects from your Azure DevOps organization
-2. **Apply Filter**: Click the **Apply** button to load pull requests for selected projects
-3. **View Pull Requests**: The main panel displays all pull requests from selected projects
-4. **Refresh Data**: Click the **Refresh** button in the top bar to update pull request data
-5. **Persistent Selection**: Your selected projects are saved automatically and restored when you revisit the app
+- npm run dev: start development server
+- npm run build: type-check and create production build
+- npm run preview: preview production build
+- npm run lint: run ESLint
 
-## Available Scripts
+## How To Use
 
-- `npm run dev` - Start the development server with hot module replacement
-- `npm run build` - Build the application for production
-- `npm run preview` - Preview the production build locally
-- `npm run lint` - Run ESLint to check code quality
+1. Select one or more projects in the Projects filter.
+2. Optionally select authors to ignore in Ignore PR Authors.
+3. Review the summary chips below the filters.
+4. Expand/collapse each project panel as needed.
+5. Open a PR by clicking its card.
 
-## Build for Production
+## Data Notes
 
-```bash
-npm run build
-```
-
-The optimized build will be generated in the `dist/` directory.
-
-Preview the production build:
-
-```bash
-npm run preview
-```
+- The app loads active pull requests from selected projects.
+- Required reviewers are used for reviewer-related card counts.
+- Approval count uses all reviewers (required + optional) with vote >= 5.
+- Active comments are calculated from active PR threads.
 
 ## Troubleshooting
 
-### Configuration Error: Missing Environment Variables
+### Missing environment variables
 
-If you see a configuration error, ensure your `.env` file contains both required variables:
+If startup shows configuration error, verify .env has both values:
 
-```
+```env
 VITE_ADO_ORG=your-organization-name
 VITE_ADO_PAT=your-personal-access-token
 ```
 
-After updating `.env`, restart the development server.
+Then restart the dev server.
 
-### Unable to Load Projects
+### No PRs shown
 
-- Verify your Personal Access Token is valid and has `Code (Read)` permissions
-- Ensure your organization name is correct
-- Check your internet connection and Azure DevOps availability
-
-### Pull Requests Not Showing
-
-- Ensure you have selected at least one project
-- Click the **Apply** button to confirm your selection
-- Try clicking **Refresh** to reload data
+- Ensure at least one project is selected
+- Check that Ignore PR Authors is not excluding expected authors
+- Use Refresh button to force reload
+- Confirm PAT permissions and organization name
 
 ## Project Structure
 
-```
+```text
 src/
-├── api/              # Azure DevOps API integration
-├── components/       # React components
-├── hooks/           # Custom React hooks
-├── App.tsx          # Main application component
-├── config.ts        # Configuration and environment variables
-├── main.tsx         # Application entry point
-└── types.ts         # TypeScript type definitions
+  api/            Azure DevOps API access
+  components/     UI components (dashboard and cards)
+  hooks/          Data-fetching hooks
+  App.tsx         App entry logic + config error screen
+  config.ts       Environment variable loading
+  types.ts        Shared TypeScript models
 ```
