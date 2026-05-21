@@ -95,6 +95,17 @@ Default URL: http://localhost:5173
 - npm run preview: preview production build
 - npm run lint: run ESLint
 
+## AI Assistant Toolkit
+
+Use these files to speed up safe code generation and maintenance:
+
+- AGENTS.md: quick operating guide for assistants and maintainers
+- .github/copilot-instructions.md: repository-specific Copilot guidance
+- docs/CODEBASE_MAP.md: architecture and extension points
+- docs/CHANGE_CHECKLIST.md: pre-change and validation checklist
+- docs/PROMPT_TEMPLATES.md: reusable prompts for feature, bug, refactor, and review tasks
+- .env.example: required environment variable template
+
 ## How To Use
 
 1. Select one or more projects in the Projects filter.
