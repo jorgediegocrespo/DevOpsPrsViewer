@@ -299,21 +299,7 @@ export function PRDashboard() {
   const [collapsedProjects, setCollapsedProjects] = useState<Record<string, boolean>>({});
   const { prs, loading: prsLoading, error: prsError, refresh } = usePullRequests(activeProjects);
 
-  useEffect(() => {
-    if (activeProjects.length === 0) return;
 
-    const intervalId = window.setInterval(() => {
-      if (!document.hidden) refresh();
-    }, 30000);
-
-    const onFocus = () => refresh();
-    window.addEventListener('focus', onFocus);
-
-    return () => {
-      window.clearInterval(intervalId);
-      window.removeEventListener('focus', onFocus);
-    };
-  }, [activeProjects.length, refresh]);
 
   const authors = useMemo(
     () => [...new Set(prs.map((pr) => pr.author))].sort((a, b) => a.localeCompare(b)),
@@ -417,10 +403,6 @@ export function PRDashboard() {
             </span>
 
             {prsLoading && <span className="text-xs text-slate-400 animate-pulse">Refreshing…</span>}
-
-            {!prsLoading && activeProjects.length > 0 && (
-              <span className="text-xs text-slate-400">Auto-refresh: 30s</span>
-            )}
 
             <button
               onClick={refresh}
