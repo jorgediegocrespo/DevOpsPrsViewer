@@ -409,7 +409,7 @@ export function PRDashboard() {
     <div className="min-h-screen bg-linear-to-br from-slate-100 via-white to-cyan-50 text-slate-800">
       <header className="border-b border-slate-200 bg-white/85 px-6 py-4 backdrop-blur-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-xl font-bold tracking-tight text-slate-900">Pull Request Kanban</h1>
+          <h1 className="text-xl font-bold tracking-tight text-slate-900">Pull Request Review</h1>
 
           <div className="flex items-center gap-3">
             <span className="text-xs text-slate-500">
