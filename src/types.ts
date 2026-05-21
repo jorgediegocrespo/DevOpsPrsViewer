@@ -36,5 +36,6 @@ export interface PRViewModel {
   completedReviewCount: number;
   approvalCount: number;
   hasActiveComments: boolean;
+  activeCommentCount: number;
   url: string;
 }

@@ -6,7 +6,9 @@ import type { PRViewModel } from '../types';
 const PROJECT_STORAGE_KEY = 'prviewer_selected_projects';
 const AUTHOR_FILTER_STORAGE_KEY = 'prviewer_selected_authors';
 
-type ColumnKey = 'created' | 'inReview' | 'comments';
+type ColumnKey = 'created' | 'inReview' | 'comments' | 'ready';
+
+const COLUMN_ORDER: ColumnKey[] = ['created', 'inReview', 'comments', 'ready'];
 
 interface FilterOption {
   id: string;
@@ -17,17 +19,22 @@ const COLUMN_CONFIG: Record<ColumnKey, { title: string; empty: string; tone: str
   created: {
     title: 'Created',
     empty: 'No PRs without reviewers.',
-    tone: 'border-slate-300 bg-slate-50/70',
+    tone: 'border-slate-300',
   },
   inReview: {
     title: 'In review',
     empty: 'No PRs currently under review.',
-    tone: 'border-cyan-300 bg-cyan-50/70',
+    tone: 'border-slate-300',
   },
   comments: {
     title: 'Comments',
     empty: 'No PRs with active comments.',
-    tone: 'border-amber-300 bg-amber-50/70',
+    tone: 'border-slate-300',
+  },
+  ready: {
+    title: 'Ready',
+    empty: 'No PRs ready.',
+    tone: 'border-slate-300',
   },
 };
 
@@ -47,6 +54,7 @@ function saveSelection(storageKey: string, values: string[]) {
 
 function classifyPR(pr: PRViewModel): ColumnKey {
   if (pr.hasActiveComments) return 'comments';
+  if (pr.approvalCount >= 2) return 'ready';
   if (pr.reviewerCount === 0) return 'created';
   return 'inReview';
 }
@@ -81,8 +89,10 @@ function PRCard({ pr }: { pr: PRViewModel }) {
         <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-emerald-700">
           Approvals: {pr.approvalCount}
         </span>
-        {pr.hasActiveComments && (
-          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-amber-700">Active comments</span>
+        {pr.activeCommentCount > 0 && (
+          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-amber-700">
+            Comments: {pr.activeCommentCount}
+          </span>
         )}
       </div>
     </a>
@@ -275,7 +285,7 @@ export function PRDashboard() {
 
   const visiblePRs = useMemo(() => {
     if (selectedAuthors.length === 0) return prs;
-    return prs.filter((pr) => selectedAuthors.includes(pr.author));
+    return prs.filter((pr) => !selectedAuthors.includes(pr.author));
   }, [prs, selectedAuthors]);
 
   const boardByProject = useMemo(() => {
@@ -285,6 +295,7 @@ export function PRDashboard() {
           created: [],
           inReview: [],
           comments: [],
+          ready: [],
         };
         return acc;
       },
@@ -297,6 +308,7 @@ export function PRDashboard() {
           created: [],
           inReview: [],
           comments: [],
+          ready: [],
         };
       }
       initial[pr.project][classifyPR(pr)].push(pr);
@@ -369,10 +381,10 @@ export function PRDashboard() {
           />
 
           <DropdownMultiSelect
-            label="PR Authors"
+            label="Ignore PR Authors"
             options={authorOptions}
             selected={selectedAuthors}
-            placeholder="All users"
+            placeholder="No ignored users"
             onChange={handleSelectedAuthorsChange}
             disabled={prsLoading && authors.length === 0}
           />
@@ -402,6 +414,7 @@ export function PRDashboard() {
               created: [],
               inReview: [],
               comments: [],
+              ready: [],
             };
 
             return (
@@ -418,8 +431,8 @@ export function PRDashboard() {
 
                 {!isCollapsed && (
                   <div className="overflow-x-auto border-t border-slate-200 px-3 py-3">
-                    <div className="grid min-w-185 grid-cols-3 gap-3">
-                      {(Object.keys(COLUMN_CONFIG) as ColumnKey[]).map((columnKey) => {
+                    <div className="grid min-w-245 grid-cols-4 gap-3">
+                      {COLUMN_ORDER.map((columnKey) => {
                         const cfg = COLUMN_CONFIG[columnKey];
                         const columnPRs = projectColumns[columnKey];
 

@@ -42,14 +42,18 @@ export function usePullRequests(selectedProjects: string[]): UsePullRequestsResu
       const prViewModels = await Promise.all(
         allPRs.map(async ({ project, pr }) => {
           const threads = await fetchPRThreads(ORG, project, pr.repository.id, pr.pullRequestId, PAT);
-          const hasActiveComments = threads.some(
+          const activeCommentCount = threads.filter(
             (t) => !t.isDeleted && t.status === 'active'
-          );
+          ).length;
+          const hasActiveComments = activeCommentCount > 0;
           const requiredReviewers = pr.reviewers.filter((r) => r.isRequired);
           const reviewers = requiredReviewers.map((r) => r.displayName);
           const reviewerCount = requiredReviewers.length;
           const completedReviewCount = requiredReviewers.filter((r) => r.vote !== 0).length;
-          const approvalCount = requiredReviewers.filter((r) => r.vote === 10).length;
+          // PR approval badge should represent total approvals on the PR,
+          // regardless of required/optional reviewer status.
+          // Azure DevOps uses 10=approved and 5=approved with suggestions.
+          const approvalCount = pr.reviewers.filter((r) => r.vote >= 5).length;
           const url = `${ADO_BASE}/${encodeURIComponent(project)}/_git/${encodeURIComponent(pr.repository.name)}/pullrequest/${pr.pullRequestId}`;
 
           return {
@@ -63,6 +67,7 @@ export function usePullRequests(selectedProjects: string[]): UsePullRequestsResu
             completedReviewCount,
             approvalCount,
             hasActiveComments,
+            activeCommentCount,
             url,
           } satisfies PRViewModel;
         })
