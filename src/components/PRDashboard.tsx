@@ -125,7 +125,15 @@ function PRCard({ pr }: { pr: PRViewModel }) {
         </p>
       </div>
       <div className="mt-3 flex items-center gap-2 text-[11px] font-semibold">
-        <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-emerald-700">
+        <span
+          className={`rounded-full px-2 py-0.5 ${
+            pr.approvalCount === 0
+              ? 'bg-slate-100 text-slate-600'
+              : pr.approvalCount === 1
+                ? 'bg-sky-100 text-sky-700'
+                : 'bg-emerald-100 text-emerald-700'
+          }`}
+        >
           Approvals: {pr.approvalCount}
         </span>
         {pr.activeCommentCount > 0 && (
