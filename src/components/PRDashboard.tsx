@@ -65,14 +65,53 @@ function cardToneByReviewers(reviewerCount: number): string {
   return 'bg-amber-50/70 border-amber-200';
 }
 
+function initials(name: string): string {
+  const parts = name
+    .split(' ')
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  if (parts.length === 0) return '?';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+}
+
 function PRCard({ pr }: { pr: PRViewModel }) {
+  const visibleReviewers = pr.reviewers.slice(0, 3);
+  const overflowReviewers = Math.max(0, pr.reviewers.length - visibleReviewers.length);
+
   return (
     <a
       href={pr.url}
       target="_blank"
       rel="noreferrer"
-      className={`block rounded-xl border p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${cardToneByReviewers(pr.reviewerCount)}`}
+      className={`relative block rounded-xl border p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${cardToneByReviewers(pr.reviewerCount)}`}
     >
+      {visibleReviewers.length > 0 && (
+        <div className="absolute right-3 top-3 flex items-center gap-1.5">
+          {visibleReviewers.map((reviewer) => (
+            <div key={reviewer.id} title={reviewer.name} className="h-6 w-6 overflow-hidden rounded-full border border-white shadow-sm">
+              {reviewer.imageUrl ? (
+                <img
+                  src={reviewer.imageUrl}
+                  alt={reviewer.name}
+                  className="h-full w-full object-cover"
+                  loading="lazy"
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <span className="flex h-full w-full items-center justify-center bg-slate-200 text-[10px] font-semibold text-slate-700">
+                  {initials(reviewer.name)}
+                </span>
+              )}
+            </div>
+          ))}
+          {overflowReviewers > 0 && (
+            <span className="ml-1 text-[10px] font-semibold text-slate-500">+{overflowReviewers}</span>
+          )}
+        </div>
+      )}
+
       <p className="line-clamp-2 text-sm font-semibold text-slate-800">{pr.title}</p>
       <div className="mt-2 space-y-1 text-xs text-slate-600">
         <p>

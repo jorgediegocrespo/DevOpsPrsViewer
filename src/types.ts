@@ -6,8 +6,15 @@ export interface AzureProject {
 export interface Reviewer {
   id: string;
   displayName: string;
+  imageUrl?: string;
   isRequired: boolean;
   vote: number; // 10=approved, 5=approved w/ suggestions, 0=no vote, -5=waiting, -10=rejected
+}
+
+export interface ReviewerPreview {
+  id: string;
+  name: string;
+  imageUrl?: string;
 }
 
 export interface RawPullRequest {
@@ -31,7 +38,7 @@ export interface PRViewModel {
   project: string;
   repoName: string;
   author: string;
-  reviewers: string[];
+  reviewers: ReviewerPreview[];
   reviewerCount: number;
   completedReviewCount: number;
   approvalCount: number;

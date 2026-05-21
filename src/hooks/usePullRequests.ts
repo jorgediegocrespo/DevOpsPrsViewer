@@ -47,7 +47,11 @@ export function usePullRequests(selectedProjects: string[]): UsePullRequestsResu
           ).length;
           const hasActiveComments = activeCommentCount > 0;
           const requiredReviewers = pr.reviewers.filter((r) => r.isRequired);
-          const reviewers = requiredReviewers.map((r) => r.displayName);
+          const reviewers = requiredReviewers.map((r) => ({
+            id: r.id,
+            name: r.displayName,
+            imageUrl: r.imageUrl,
+          }));
           const reviewerCount = requiredReviewers.length;
           const completedReviewCount = requiredReviewers.filter((r) => r.vote !== 0).length;
           // PR approval badge should represent total approvals on the PR,
