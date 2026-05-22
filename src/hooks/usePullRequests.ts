@@ -60,12 +60,17 @@ export function usePullRequests(selectedProjects: string[]): UsePullRequestsResu
           const approvalCount = pr.reviewers.filter((r) => r.vote >= 5).length;
           const url = `${ADO_BASE}/${encodeURIComponent(project)}/_git/${encodeURIComponent(pr.repository.name)}/pullrequest/${pr.pullRequestId}`;
 
+          const sourceBranch = pr.sourceRefName.replace(/^refs\/heads\//, '');
+          const targetBranch = pr.targetRefName.replace(/^refs\/heads\//, '');
+
           return {
             id: pr.pullRequestId,
             title: pr.title,
             project,
             repoName: pr.repository.name,
             author: pr.createdBy.displayName,
+            sourceBranch,
+            targetBranch,
             reviewers,
             reviewerCount,
             completedReviewCount,

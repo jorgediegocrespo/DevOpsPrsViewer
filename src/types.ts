@@ -24,6 +24,8 @@ export interface RawPullRequest {
   repository: { id: string; name: string };
   reviewers: Reviewer[];
   isDraft: boolean;
+  sourceRefName: string;
+  targetRefName: string;
 }
 
 export interface Thread {
@@ -38,6 +40,8 @@ export interface PRViewModel {
   project: string;
   repoName: string;
   author: string;
+  sourceBranch: string;
+  targetBranch: string;
   reviewers: ReviewerPreview[];
   reviewerCount: number;
   completedReviewCount: number;

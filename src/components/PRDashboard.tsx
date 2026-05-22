@@ -113,15 +113,14 @@ function PRCard({ pr }: { pr: PRViewModel }) {
       )}
 
       <p className="line-clamp-2 pr-16 text-sm font-semibold text-slate-800 dark:text-slate-100">{pr.title}</p>
+      <p className="mt-1 pr-16 text-[11px] text-slate-500 dark:text-slate-400 truncate">
+        <span className="font-medium text-slate-700 dark:text-slate-300">{pr.sourceBranch}</span>
+        <span className="mx-1">→</span>
+        <span className="font-medium text-slate-700 dark:text-slate-300">{pr.targetBranch}</span>
+      </p>
       <div className="mt-2 space-y-1 text-xs text-slate-600 dark:text-slate-300">
         <p>
-          Repo: <span className="font-medium text-slate-700 dark:text-slate-200">{pr.repoName}</span>
-        </p>
-        <p>
           Author: <span className="font-medium text-slate-700 dark:text-slate-200">{pr.author}</span>
-        </p>
-        <p>
-          Reviewers: <span className="font-medium text-slate-700 dark:text-slate-200">{pr.reviewerCount}</span>
         </p>
       </div>
       <div className="mt-3 flex items-center gap-2 text-[11px] font-semibold">
