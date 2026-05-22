@@ -69,6 +69,7 @@ export function usePullRequests(selectedProjects: string[]): UsePullRequestsResu
             project,
             repoName: pr.repository.name,
             author: pr.createdBy.displayName,
+            creationDate: pr.creationDate,
             sourceBranch,
             targetBranch,
             reviewers,

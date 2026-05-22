@@ -21,6 +21,7 @@ export interface RawPullRequest {
   pullRequestId: number;
   title: string;
   createdBy: { displayName: string };
+  creationDate: string;
   repository: { id: string; name: string };
   reviewers: Reviewer[];
   isDraft: boolean;
@@ -40,6 +41,7 @@ export interface PRViewModel {
   project: string;
   repoName: string;
   author: string;
+  creationDate: string;
   sourceBranch: string;
   targetBranch: string;
   reviewers: ReviewerPreview[];

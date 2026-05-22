@@ -122,6 +122,9 @@ function PRCard({ pr }: { pr: PRViewModel }) {
       </p>
       <div className="mt-2 space-y-1 text-xs text-slate-600 dark:text-slate-300">
         <p>
+          Repo: <span className="font-medium text-slate-700 dark:text-slate-200">{pr.repoName}</span>
+        </p>
+        <p>
           Author: <span className="font-medium text-slate-700 dark:text-slate-200">{pr.author}</span>
         </p>
       </div>
@@ -142,6 +145,9 @@ function PRCard({ pr }: { pr: PRViewModel }) {
             Comments: {pr.activeCommentCount}
           </span>
         )}
+        <span className="ml-auto text-[10px] font-normal text-slate-400 dark:text-slate-500">
+          {new Date(pr.creationDate).toLocaleDateString()}
+        </span>
       </div>
     </a>
   );
