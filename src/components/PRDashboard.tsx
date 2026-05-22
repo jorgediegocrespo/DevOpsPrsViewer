@@ -114,8 +114,10 @@ function PRCard({ pr }: { pr: PRViewModel }) {
 
       <p className="line-clamp-2 pr-16 text-sm font-semibold text-slate-800 dark:text-slate-100">{pr.title}</p>
       <p className="mt-1 pr-16 text-[11px] text-slate-500 dark:text-slate-400 truncate">
+        <span className="font-medium text-slate-700 dark:text-slate-300">Source:</span>{' '}
         <span className="font-medium text-slate-700 dark:text-slate-300">{pr.sourceBranch}</span>
         <span className="mx-1">→</span>
+        <span className="font-medium text-slate-700 dark:text-slate-300">Target:</span>{' '}
         <span className="font-medium text-slate-700 dark:text-slate-300">{pr.targetBranch}</span>
       </p>
       <div className="mt-2 space-y-1 text-xs text-slate-600 dark:text-slate-300">
