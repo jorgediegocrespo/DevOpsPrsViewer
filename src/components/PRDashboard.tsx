@@ -303,9 +303,31 @@ export function PRDashboard({ theme, onToggleTheme }: PRDashboardProps) {
   const [activeProjects, setActiveProjects] = useState<string[]>(() => loadSavedSelection(PROJECT_STORAGE_KEY));
   const [selectedAuthors, setSelectedAuthors] = useState<string[]>(() => loadSavedSelection(AUTHOR_FILTER_STORAGE_KEY));
   const [collapsedProjects, setCollapsedProjects] = useState<Record<string, boolean>>({});
+  const [secondsUntilRefresh, setSecondsUntilRefresh] = useState(30);
   const { prs, loading: prsLoading, error: prsError, refresh } = usePullRequests(activeProjects);
 
+  // Auto-refresh every 30 seconds when projects are selected
+  useEffect(() => {
+    if (activeProjects.length === 0) return;
 
+    const intervalId = window.setInterval(() => {
+      refresh();
+      setSecondsUntilRefresh(30);
+    }, 30000);
+
+    return () => window.clearInterval(intervalId);
+  }, [activeProjects, refresh]);
+
+  // Countdown timer for next refresh
+  useEffect(() => {
+    if (activeProjects.length === 0) return;
+
+    const countdownId = window.setInterval(() => {
+      setSecondsUntilRefresh((prev) => (prev > 0 ? prev - 1 : 30));
+    }, 1000);
+
+    return () => window.clearInterval(countdownId);
+  }, [activeProjects]);
 
   const authors = useMemo(
     () => [...new Set(prs.map((pr) => pr.author))].sort((a, b) => a.localeCompare(b)),
@@ -409,6 +431,12 @@ export function PRDashboard({ theme, onToggleTheme }: PRDashboardProps) {
             </span>
 
             {prsLoading && <span className="animate-pulse text-xs text-slate-400 dark:text-slate-500">Refreshing…</span>}
+
+            {activeProjects.length > 0 && (
+              <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                Next refresh in <strong>{secondsUntilRefresh}s</strong>
+              </span>
+            )}
 
             <button
               type="button"
