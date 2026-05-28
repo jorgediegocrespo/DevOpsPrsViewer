@@ -48,6 +48,11 @@ Web application to monitor Azure DevOps pull requests across multiple projects u
   - manual refresh button
   - auto-refresh every 30 seconds when projects are selected
   - refresh on browser window focus
+- Browser notifications when the board changes after the first fetch:
+  - PR created
+  - PR completed
+  - PR moved to a different column
+  - browser permission is required and can be enabled from the header
 - Light/dark theme toggle with preference persisted in localStorage
 - Favicon customized with a review-themed SVG icon (free/original)
 - Config validation with clear startup error message when required environment variables are missing
@@ -140,6 +145,7 @@ Then restart the dev server.
 - Ensure at least one project is selected
 - Check that Ignore PR Authors is not excluding expected authors
 - Use Refresh button to force reload
+- Allow browser notifications if you want change alerts
 - Confirm PAT permissions and organization name
 
 ## Project Structure

@@ -2,11 +2,12 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useProjects } from '../hooks/useProjects';
 import { usePullRequests } from '../hooks/usePullRequests';
 import type { PRViewModel } from '../types';
+import { classifyPR, type PRColumnKey } from '../utils/prClassification';
 
 const PROJECT_STORAGE_KEY = 'prviewer_selected_projects';
 const AUTHOR_FILTER_STORAGE_KEY = 'prviewer_selected_authors';
 
-type ColumnKey = 'created' | 'inReview' | 'comments' | 'ready';
+type ColumnKey = PRColumnKey;
 
 const COLUMN_ORDER: ColumnKey[] = ['created', 'inReview', 'comments', 'ready'];
 
@@ -50,13 +51,6 @@ function loadSavedSelection(storageKey: string): string[] {
 
 function saveSelection(storageKey: string, values: string[]) {
   localStorage.setItem(storageKey, JSON.stringify(values));
-}
-
-function classifyPR(pr: PRViewModel): ColumnKey {
-  if (pr.hasActiveComments) return 'comments';
-  if (pr.approvalCount >= 2) return 'ready';
-  if (pr.reviewerCount === 0) return 'created';
-  return 'inReview';
 }
 
 function cardToneByReviewers(reviewerCount: number): string {
@@ -310,6 +304,10 @@ export function PRDashboard({ theme, onToggleTheme }: PRDashboardProps) {
   const [selectedAuthors, setSelectedAuthors] = useState<string[]>(() => loadSavedSelection(AUTHOR_FILTER_STORAGE_KEY));
   const [collapsedProjects, setCollapsedProjects] = useState<Record<string, boolean>>({});
   const [secondsUntilRefresh, setSecondsUntilRefresh] = useState(30);
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | 'unsupported'>(() => {
+    if (typeof window === 'undefined' || typeof Notification === 'undefined') return 'unsupported';
+    return Notification.permission;
+  });
   const { prs, loading: prsLoading, error: prsError, refresh } = usePullRequests(activeProjects);
 
   // Auto-refresh every 30 seconds when projects are selected
@@ -334,6 +332,22 @@ export function PRDashboard({ theme, onToggleTheme }: PRDashboardProps) {
 
     return () => window.clearInterval(countdownId);
   }, [activeProjects]);
+
+  useEffect(() => {
+    if (typeof Notification === 'undefined') return;
+
+    const syncPermission = () => {
+      setNotificationPermission(Notification.permission);
+    };
+
+    window.addEventListener('focus', syncPermission);
+    document.addEventListener('visibilitychange', syncPermission);
+
+    return () => {
+      window.removeEventListener('focus', syncPermission);
+      document.removeEventListener('visibilitychange', syncPermission);
+    };
+  }, []);
 
   const authors = useMemo(
     () => [...new Set(prs.map((pr) => pr.author))].sort((a, b) => a.localeCompare(b)),
@@ -425,24 +439,25 @@ export function PRDashboard({ theme, onToggleTheme }: PRDashboardProps) {
     }));
   }
 
+  async function enableNotifications() {
+    if (typeof Notification === 'undefined') return;
+    const permission = await Notification.requestPermission();
+    setNotificationPermission(permission);
+  }
+
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-100 via-white to-cyan-50 text-slate-800 dark:from-slate-950 dark:via-slate-900 dark:to-cyan-950 dark:text-slate-100">
       <header className="border-b border-slate-200 bg-white/85 px-6 py-4 backdrop-blur-sm dark:border-slate-800 dark:bg-slate-900/85">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">Pull Request Review</h1>
-
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-slate-500 dark:text-slate-300">
+          <div>
+            <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">Pull Request Review</h1>
+            <span className="mt-1 block text-xs text-slate-500 dark:text-slate-300">
               Showing <strong>{visiblePRs.length}</strong> of <strong>{prs.length}</strong> PRs
             </span>
+          </div>
 
+          <div className="flex items-start gap-3">
             {prsLoading && <span className="animate-pulse text-xs text-slate-400 dark:text-slate-500">Refreshing…</span>}
-
-            {activeProjects.length > 0 && (
-              <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
-                Next refresh in <strong>{secondsUntilRefresh}s</strong>
-              </span>
-            )}
 
             <button
               type="button"
@@ -452,13 +467,41 @@ export function PRDashboard({ theme, onToggleTheme }: PRDashboardProps) {
               {theme === 'dark' ? 'Light mode' : 'Dark mode'}
             </button>
 
-            <button
-              onClick={refresh}
-              disabled={prsLoading || activeProjects.length === 0}
-              className="rounded-md bg-cyan-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-cyan-700 disabled:opacity-40"
-            >
-              Refresh
-            </button>
+            <div className="flex flex-col items-start gap-1">
+              <button
+                onClick={() => refresh({ manual: true })}
+                disabled={prsLoading || activeProjects.length === 0}
+                className="rounded-md bg-cyan-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-cyan-700 disabled:opacity-40"
+              >
+                Refresh
+              </button>
+
+              {activeProjects.length > 0 && (
+                <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                  Next refresh in <strong>{secondsUntilRefresh}s</strong>
+                </span>
+              )}
+
+              {notificationPermission === 'default' && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    void enableNotifications();
+                  }}
+                  className="rounded-md border border-cyan-300 bg-cyan-50 px-2.5 py-1 text-xs font-medium text-cyan-800 transition-colors hover:bg-cyan-100 dark:border-cyan-800 dark:bg-cyan-950/60 dark:text-cyan-200 dark:hover:bg-cyan-950"
+                >
+                  Enable notifications
+                </button>
+              )}
+
+              {notificationPermission === 'granted' && (
+                <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">Notifications on</span>
+              )}
+
+              {notificationPermission === 'denied' && (
+                <span className="text-xs font-medium text-amber-700 dark:text-amber-300">Notifications blocked by browser settings</span>
+              )}
+            </div>
           </div>
         </div>
 
