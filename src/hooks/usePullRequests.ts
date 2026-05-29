@@ -128,7 +128,7 @@ function notifyChanges(changes: PRChange[]) {
   void showBrowserNotification('Azure DevOps PRs updated', buildNotificationBody(changes));
 }
 
-export function usePullRequests(selectedProjects: string[]): UsePullRequestsResult {
+export function usePullRequests(selectedProjects: string[], notificationsEnabled: boolean): UsePullRequestsResult {
   const [prs, setPrs] = useState<PRViewModel[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -136,6 +136,11 @@ export function usePullRequests(selectedProjects: string[]): UsePullRequestsResu
   const previousSnapshotRef = useRef<Map<string, PRSnapshot> | null>(null);
   const hasInitialSnapshotRef = useRef(false);
   const manualRefreshRequestedRef = useRef(false);
+  const notificationsEnabledRef = useRef(notificationsEnabled);
+
+  useEffect(() => {
+    notificationsEnabledRef.current = notificationsEnabled;
+  }, [notificationsEnabled]);
 
   const fetchAll = useCallback(async (projects: string[], signal: AbortSignal) => {
     if (projects.length === 0) {
@@ -223,7 +228,9 @@ export function usePullRequests(selectedProjects: string[]): UsePullRequestsResu
       const hasPreviousSnapshot = previousSnapshotRef.current !== null;
       if (hasPreviousSnapshot && (hasInitialSnapshotRef.current || manualRefreshRequestedRef.current)) {
         const changes = diffPRSnapshots(previousSnapshotRef.current ?? new Map(), currentSnapshot);
-        notifyChanges(changes);
+        if (notificationsEnabledRef.current) {
+          notifyChanges(changes);
+        }
       } else {
         hasInitialSnapshotRef.current = true;
       }

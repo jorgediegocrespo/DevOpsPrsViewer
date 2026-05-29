@@ -52,7 +52,8 @@ Web application to monitor Azure DevOps pull requests across multiple projects u
   - PR created
   - PR completed
   - PR moved to a different column
-  - browser permission is required and can be enabled from the header
+  - in-app header toggle to activate or deactivate notifications
+  - browser permission is required before the toggle can turn notifications on
 - Light/dark theme toggle with preference persisted in localStorage
 - Favicon customized with a review-themed SVG icon (free/original)
 - Config validation with clear startup error message when required environment variables are missing
@@ -145,7 +146,8 @@ Then restart the dev server.
 - Ensure at least one project is selected
 - Check that Ignore PR Authors is not excluding expected authors
 - Use Refresh button to force reload
-- Allow browser notifications if you want change alerts
+- Turn on the Notifications toggle if you want change alerts
+- If the toggle is blocked, allow browser notifications in site settings
 - Confirm PAT permissions and organization name
 
 ## Project Structure

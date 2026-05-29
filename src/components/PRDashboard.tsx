@@ -6,6 +6,7 @@ import { classifyPR, type PRColumnKey } from '../utils/prClassification';
 
 const PROJECT_STORAGE_KEY = 'prviewer_selected_projects';
 const AUTHOR_FILTER_STORAGE_KEY = 'prviewer_selected_authors';
+const NOTIFICATION_STORAGE_KEY = 'prviewer_notifications_enabled';
 
 type ColumnKey = PRColumnKey;
 
@@ -51,6 +52,22 @@ function loadSavedSelection(storageKey: string): string[] {
 
 function saveSelection(storageKey: string, values: string[]) {
   localStorage.setItem(storageKey, JSON.stringify(values));
+}
+
+function loadSavedFlag(storageKey: string, fallback: boolean): boolean {
+  try {
+    const raw = localStorage.getItem(storageKey);
+    if (!raw) return fallback;
+
+    const parsed = JSON.parse(raw) as unknown;
+    return typeof parsed === 'boolean' ? parsed : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function saveFlag(storageKey: string, value: boolean) {
+  localStorage.setItem(storageKey, JSON.stringify(value));
 }
 
 function cardToneByReviewers(reviewerCount: number): string {
@@ -308,7 +325,11 @@ export function PRDashboard({ theme, onToggleTheme }: PRDashboardProps) {
     if (typeof window === 'undefined' || typeof Notification === 'undefined') return 'unsupported';
     return Notification.permission;
   });
-  const { prs, loading: prsLoading, error: prsError, refresh } = usePullRequests(activeProjects);
+  const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(() => {
+    if (typeof window === 'undefined' || typeof Notification === 'undefined') return false;
+    return loadSavedFlag(NOTIFICATION_STORAGE_KEY, Notification.permission === 'granted');
+  });
+  const { prs, loading: prsLoading, error: prsError, refresh } = usePullRequests(activeProjects, notificationsEnabled);
 
   // Auto-refresh every 30 seconds when projects are selected
   useEffect(() => {
@@ -348,6 +369,14 @@ export function PRDashboard({ theme, onToggleTheme }: PRDashboardProps) {
       document.removeEventListener('visibilitychange', syncPermission);
     };
   }, []);
+
+  useEffect(() => {
+    if (notificationPermission === 'granted') return;
+    if (!notificationsEnabled) return;
+
+    setNotificationsEnabled(false);
+    saveFlag(NOTIFICATION_STORAGE_KEY, false);
+  }, [notificationPermission, notificationsEnabled]);
 
   const authors = useMemo(
     () => [...new Set(prs.map((pr) => pr.author))].sort((a, b) => a.localeCompare(b)),
@@ -443,7 +472,29 @@ export function PRDashboard({ theme, onToggleTheme }: PRDashboardProps) {
     if (typeof Notification === 'undefined') return;
     const permission = await Notification.requestPermission();
     setNotificationPermission(permission);
+    const enabled = permission === 'granted';
+    setNotificationsEnabled(enabled);
+    saveFlag(NOTIFICATION_STORAGE_KEY, enabled);
   }
+
+  function updateNotificationsEnabled(enabled: boolean) {
+    setNotificationsEnabled(enabled);
+    saveFlag(NOTIFICATION_STORAGE_KEY, enabled);
+  }
+
+  async function handleNotificationToggle() {
+    if (notificationPermission === 'unsupported' || notificationPermission === 'denied') return;
+
+    if (notificationPermission === 'granted') {
+      updateNotificationsEnabled(!notificationsEnabled);
+      return;
+    }
+
+    await enableNotifications();
+  }
+
+  const notificationsActive = notificationPermission === 'granted' && notificationsEnabled;
+  const notificationToggleDisabled = notificationPermission === 'unsupported' || notificationPermission === 'denied';
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-100 via-white to-cyan-50 text-slate-800 dark:from-slate-950 dark:via-slate-900 dark:to-cyan-950 dark:text-slate-100">
@@ -457,24 +508,32 @@ export function PRDashboard({ theme, onToggleTheme }: PRDashboardProps) {
           </div>
 
           <div className="flex items-start gap-3">
-            {prsLoading && <span className="animate-pulse text-xs text-slate-400 dark:text-slate-500">Refreshing…</span>}
+            <div className="flex flex-col items-end gap-1 text-right">
+              <div className="flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={onToggleTheme}
+                  className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+                >
+                  {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+                </button>
 
-            <button
-              type="button"
-              onClick={onToggleTheme}
-              className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
-            >
-              {theme === 'dark' ? 'Light mode' : 'Dark mode'}
-            </button>
-
-            <div className="flex flex-col items-start gap-1">
-              <button
-                onClick={() => refresh({ manual: true })}
-                disabled={prsLoading || activeProjects.length === 0}
-                className="rounded-md bg-cyan-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-cyan-700 disabled:opacity-40"
-              >
-                Refresh
-              </button>
+                <button
+                  onClick={() => refresh({ manual: true })}
+                  disabled={prsLoading || activeProjects.length === 0}
+                  className="inline-flex min-w-22 items-center justify-center rounded-md bg-cyan-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-cyan-700 disabled:opacity-40"
+                  aria-label={prsLoading ? 'Refreshing pull requests' : 'Refresh pull requests'}
+                >
+                  {prsLoading ? (
+                    <>
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/35 border-t-white" aria-hidden="true" />
+                      <span className="sr-only">Refreshing pull requests</span>
+                    </>
+                  ) : (
+                    'Refresh'
+                  )}
+                </button>
+              </div>
 
               {activeProjects.length > 0 && (
                 <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
@@ -482,25 +541,29 @@ export function PRDashboard({ theme, onToggleTheme }: PRDashboardProps) {
                 </span>
               )}
 
-              {notificationPermission === 'default' && (
+              <div className="flex items-center justify-end gap-2">
+                <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Notifications</span>
                 <button
                   type="button"
+                  role="switch"
+                  aria-checked={notificationsActive}
+                  aria-label="Toggle browser notifications"
                   onClick={() => {
-                    void enableNotifications();
+                    void handleNotificationToggle();
                   }}
-                  className="rounded-md border border-cyan-300 bg-cyan-50 px-2.5 py-1 text-xs font-medium text-cyan-800 transition-colors hover:bg-cyan-100 dark:border-cyan-800 dark:bg-cyan-950/60 dark:text-cyan-200 dark:hover:bg-cyan-950"
+                  disabled={notificationToggleDisabled}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full border transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                    notificationsActive
+                      ? 'border-emerald-500 bg-emerald-500'
+                      : 'border-slate-300 bg-slate-200 dark:border-slate-600 dark:bg-slate-700'
+                  }`}
                 >
-                  Enable notifications
+                  <span
+                    className={`inline-block h-4 w-4 rounded-full bg-white transition-transform ${notificationsActive ? 'translate-x-6' : 'translate-x-1'}`}
+                    aria-hidden="true"
+                  />
                 </button>
-              )}
-
-              {notificationPermission === 'granted' && (
-                <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">Notifications on</span>
-              )}
-
-              {notificationPermission === 'denied' && (
-                <span className="text-xs font-medium text-amber-700 dark:text-amber-300">Notifications blocked by browser settings</span>
-              )}
+              </div>
             </div>
           </div>
         </div>
