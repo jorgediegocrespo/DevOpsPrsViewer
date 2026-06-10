@@ -162,7 +162,7 @@ export function usePullRequests(selectedProjects: string[], notificationsEnabled
 
       // Flatten and fetch threads for every PR in parallel
       const allPRs = projectPRResults.flatMap(({ project, list }) =>
-        list.map((pr) => ({ project, pr }))
+        list.filter((pr) => !pr.isDraft).map((pr) => ({ project, pr }))
       );
 
       const prResults = await Promise.all(
